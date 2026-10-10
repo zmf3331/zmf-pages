@@ -1,0 +1,6 @@
+# 仅本地预览用：bundle exec jekyll serve --config _config.yml,_config_dev.yml
+# 显式用 localhost，避免 jekyll serve 自动填成 0.0.0.0（会被系统代理拦截导致资源 502）
+# 本地覆盖 baseurl 为空，方便在 http://localhost:4000/ 下访问
+url: "http://localhost:4000"
+baseurl: ""
+

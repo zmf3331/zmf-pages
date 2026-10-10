@@ -1,0 +1,38 @@
+[
+{
+  "title": "Bind-DNS管理",
+  "url": "/2026/10/10/dns/",
+  "date": "2026-10-10",
+  "category": "网络",
+  "content": "1、BIND介绍与安装1.1 DNS协议​\tDNS（Domain Name System，域名系统）是一个分布式数据库系统，用于将人类可读的域名（如 www.example.com）转换为机器可读的 IP 地址（如 192.168.1.1），也可以反向解析将 IP 地址转换为域名。DNS 协议采用客户端/服务器模式，默认端口为 53（TCP 和 UDP）。01 DNS 查询流程​\t当用户在浏览器输入域名时，DNS 解析过程大致如下：首先查询本地 DNS 缓存（浏览器缓存 → 系统 hosts 文件 → 系统 DNS 缓存），如果本地未命中，则向配置的 DNS 服务器（递归解析器）发起查询。递归解析器会依次向根域名服务器 → 顶级域（TLD）服务器 → 权威域名服务器逐级查询，最终返回域名对应的 IP 地址。整个解析过程对最终用户是透明的。根域名服务器全球有 13 组（A - M），由 ICANN 管理。顶级域如 .com、.cn 分别由各自的注册局管理，权威域名服务器才是域名最终持有者自己配置的服务器。02 资源记录类型DNS 通过资源记录（Resource Record，RR）来存储和传递域名信息，常见类型如下：            记录类型      说明      配置示例                  A      将域名指向 IPv4 地址      www.example.com. IN A 192.168.1.10              AAAA      将域名指向 IPv6 地址      www.example.com. IN AAAA 2001:db8::1              CNAME      别名记录，将域名指向另一个域名      ftp.example.com. IN CNAME www.example.com.              MX      邮件交换记录，指定邮件服务器      example.com. IN MX 10 mail.example.com.              NS      域名服务器记录，指定该域名的权威 DNS 服务器      example.com. IN NS ns1.example.com.              TXT      文本记录，常用于 SPF/DKIM 验证      example.com. IN TXT \"v=spf1 mx ~all\"              PTR      反向记录，将 IP 指向域名      1.0.168.192.in-addr.arpa. IN PTR ns1.example.com.              SOA      起始授权记录，定义区域的核心参数      example.com. IN SOA ns1.example.com. admin.example.com. ( ... )              SRV      服务定位记录，指定特定服务的服务器      _sip._tcp.example.com. IN SRV 10 60 5060 sip.example.com.      1.2 BIND安装​\tBIND（Berkeley Internet Name Domain）是目前互联网上使用最广泛的 DNS 服务器软件，由 ISC（Internet Systems Consortium）开发和维护。特点是稳定、功能全面、支持 DNSSEC、支持视图（view）等高"
+},
+{
+  "title": "Vsftpd部署使用",
+  "url": "/2026/10/10/vsftpd/",
+  "date": "2026-10-10",
+  "category": "Linux基础",
+  "content": "1、Vsftpd介绍与安装1.1 Ftp协议​\tFTP（File Transfer Protocol，文件传输协议）是一种用于在计算机网络上进行文件传输的标准协议。它允许用户从一台计算机向另一台计算机上传或下载文件。FTP的工作原理涉及到客户端和服务器之间的交互，以及数据传输的过程。早期浏览器和windows资源管理器都支持直接打开ftp协议，后来因为安全问题禁止了01 Ftp的工作流程​\t当FTP客户端要上传／下载文件时，通过与服务端21号端口建立于 TCP之上的控制连接，当服务端收到命令之后，立即进行验证或者响应（如：用户名和密码验证，文件传输命令等）。服务端收到文件传输命令时就需要和客户端建立一个数据连接通道用于传输文件，这个连接的建立可以由客户端主动发起，也可以由服务端发起。​    数据连接并不是永久性存在的，一旦传输完毕就会将这个连接关闭掉，对于控制连接，只有关闭客户端控制连接才会随之关闭，控制连接是随客户端一起存在的。而数据连接是短暂存在的，只要文件／列表传输完成，数据连接就关闭了。FTP协议有主动式和被动式两种工作方式，主动与被动是针对服务器是否主动发起数据连接而言的。02 Ftp主动模式（Port模式）​\t在Port模式下，FTP 客户端首先和FTP服务器的TCP 21端口建立连接，通过这个通道发送命令，客户端需要接收数据的时候在这个通道上发送 PORT 命令。 PORT命令包含了客户端用什么端口接收数据。在传送数据的时候，服务器端通过自己的TCP 20端口主动连接至客户端的指定端口发送数据。 FTP server必须和客户端建立一个新的连接用来传送数据。​\t这个模式的问题在于，当客户端是内网设备时，通常有防火墙或NAT（网络地址转换）设备保护。来自外网服务器的连接请求，很容易被客户端的防火墙拦截导致数据连接失败。原因是主动模式的核心逻辑是服务器主动连接客户端且客户端的端口随机03 Ftp被动模式（Pasv模式）​\t在Pasv模式下，FTP客户端首先和FTP服务器的TCP 21端口建立连接，通过这个通道发送命令。当客户端需要接收数据时，它在这个通道上发送 PASV 命令。服务器收到PASV命令后，会开启一个随机的高位端口（比如端口2024），并通过控制通道将这个端口号告诉客户端。在传送数据时，由客户端主动从自己的另一个随机端口，连接至服务器指定的那个随机端口，从而建立一个新的数据连接。​\t这个模式很好地解决了主动模式的问题，因为数据连接是由客户端主动发起的，可以顺利穿透客户端的防火墙或NAT设备。但其问题在于，服务器端需要开放一个随机的高位端口范围供客户端连接，如果服务器防火墙配置不当，只开放了21端口，被动模式的数据连接同样会失败。此外客户端或服务器使用NAT时，IP地址映射可能出现不一致，导致连接失败。在实际使用中建议优先选择被动模式，开放服务器21端口和一个范围端口（如40000~65535）1.2 Vsftpd安装Vsftpd是一个完全免费开源的ftp服务器软件，特点是小巧轻快，安全易用，支持虚拟用户，支持带宽限制。官网：https://security.appspot.com/vsftpd.html一般来说各大Linux发行商的软件源都已内置了vsftpd，如果使用不了软件源可以去官网下载源码包# apt -y install vsftpd tnftp# wget https://security.appspot.com/downloads/vsftpd-3.0.5.tar.gz$ yum -y install vsf"
+},
+{
+  "title": "Linux进程任务管理",
+  "url": "/2026/10/10/process/",
+  "date": "2026-10-10",
+  "category": "Linux基础",
+  "content": "本文覆盖 Linux 进程与内存管理、性能分析工具、计划任务与 systemd、内核与系统启动、终端复用五部分内容，可作为日常运维与故障排查的速查手册。            章节      主要内容      关键工具 / 命令                  1 进程和内存管理      进程与线程、进程状态、父子关系、优先级与调度、进程查看与控制、虚拟内存、swap 与 OOM、内存泄漏排查      ps、top、htop、pstree、free、pmap、lsof              2 进程管理和性能相关工具      系统负载与资源统计、单进程资源分析、磁盘 IO、历史性能数据、系统调用与函数跟踪、崩溃定位      uptime、vmstat、mpstat、pidstat、iostat、sar、dstat、strace、perf              3 计划任务和Systemd      一次性任务、周期性任务、开机补跑、systemd 定时器、unit 文件编写、target 与运行级别、journald 日志      at、cron、anacron、systemd-run、systemctl、journalctl              4 内核和系统启动      内核模块、内核参数调优、启动流程、GRUB2 与 initramfs、启动故障处理、内核日志诊断      lsmod、modprobe、sysctl、grub2-mkconfig、dmesg              5 终端复用方法      会话保持原理、方案对比、screen 与 tmux 用法、配置文件、分屏与输出留存、与 systemd 的取舍      screen、tmux      1 进程和内存管理1.1 进程基础Linux 是一个多用户、多任务的操作系统，”多任务”在系统层面的实现方式就是——把 CPU 时间切成很小的时间片，让多个程序轮流使用 CPU。为了管理这些并发运行的程序，内核抽象出了”进程”这一概念。进程是程序在操作系统中的一次执行过程，也是系统进行资源分配和调度的基本单位。1.1.1 进程与线程程序（Program）是存放在磁盘上的静态指令集合；进程（Process）是程序的一次动态执行过程，拥有独立的虚拟地址空间、文件描述符表、信号处理方式等资源。线程（Thread）是进程内部的一条执行流，是 CPU 调度的最小单位。同一进程内的多个线程共享该进程的地址空间、文件描述符等资源，但各自拥有独立的栈和寄存器上下文，因此创建线程的开销远小于创建进程。从内核视角看，Linux 并没有为线程单独设计一套数据结构，而是统一用 task_struct 描述”任务”，线程本质上就是与其他进程共享部分资源的进程，内核称之为轻量级进程（LWP，Light Weight Process）。同一线程组内的线程拥有相同的 TGID（线程组 ID），也就是用户态看到的 PID。1.1.2 进程的状态进程在整个生命周期中会在不同状态之间切换，ps 的 STAT 列与 top 的状态列都反映进程当前状态，常见取值如下：            状态码      名称      含义                  R      Running / Runnable      正在运行，或已就绪在运行队列中等待 CPU              S      Interruptible Sleep      可中断睡眠，等待事件（IO 完成、信"
+},
+{
+  "title": "语言环境安装",
+  "url": "/2026/10/10/envinstall/",
+  "date": "2026-10-10",
+  "category": "技术杂谈",
+  "content": "1、Python  官网：https://www.python.org/  下载页面：https://www.python.org/downloads/# 安装版本：3.13.15# 发布时间：2026年8月5日# 安装方式：编译安装# 安装依赖包、指定OpenSSL库的头文件和链接库路径# apt install -y build-essential libssl-dev zlib1g-dev libncurses5-dev libsqlite3-dev libreadline-dev libbz2-dev libffi-dev liblzma-dev tk-dev$ yum -y install gcc gcc-c++ make zlib* bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel xz-devel libffi-devel openssl-devel openssl11 openssl11-devel$ export CFLAGS=$(pkg-config --cflags openssl11)$ export LDFLAGS=$(pkg-config --libs openssl11)# 编译安装Python$ wget https://www.python.org/ftp/python/3.13.15/Python-3.13.15.tar.xz$ tar xf Python-3.13.15.tar.xz &amp;&amp; cd Python-3.13.15$ ./configure --enable-shared --prefix=/usr/local/python3 --with-ssl$ make -j 5 &amp;&amp; make install$ cat &gt; /etc/profile.d/python3.sh &lt;&lt;'EOF'export PATH=${PATH}:/usr/local/python3/binEOF$ source /etc/profile# 会报错,需要配置共享库文件$ python3python3: error while loading shared libraries: libpython3.11.so.1.0: cannot open shared object file: No such file or directory$ echo '/usr/local/python3/lib' &gt;&gt; /etc/ld.so.conf.d/python3.conf$ ldconfig# 配置pip使用国内阿里云源$ python3 -m pip config set global.index-url https://mirrors.aliyun.com/pypi/simple# 升级pip版本$ python3 -m pip install --upgrade pip# docker镜像$ docker pull python:3.13.15$ docker pull python:3.13.15-alpine2、Golang  官网：https://go.dev/  下载页面：https://go.dev/dl/# 安装版本：1.26.5# 发布时间：2026年7月7日# 安装方式：二进制安装$ wget https://go.dev/dl/g"
+},
+{
+  "title": "欢迎来到我的博客",
+  "url": "/2026/09/29/welcome/",
+  "date": "2026-09-29",
+  "category": "初始介绍",
+  "content": "你好，我是朱名斐。欢迎来到我的博客 👋这里会记录我的学习笔记、技术实践和一些日常思考。"
+}
+
+]

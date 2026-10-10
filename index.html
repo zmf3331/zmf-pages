@@ -1,0 +1,55 @@
+---
+layout: default
+class: home
+menu: 首页
+comments: false
+---
+
+<section class="hero wrap">
+  <div class="eyebrow">{{ site.title }} · ZMF</div>
+  <h1>
+    <span class="ln"><span>记录学习、思考</span></span>
+    <span class="ln"><span>与每一<span class="accent-ink">次</span>技术实践</span></span>
+  </h1>
+  <p class="sub">{{ site.description }}。写下代码、笔记和一些想通的小事 —— 慢慢沉淀，等你来读。</p>
+  <div class="meta">
+    <span>📍 {{ site.location }}</span>
+    <a href="{{ site.github_username_url }}" target="_blank" rel="noopener">@{{ site.github_username }}</a>
+    <span>✉ {{ site.email }}</span>
+  </div>
+</section>
+
+<section class="posts wrap">
+  <div class="sec-head" data-reveal>
+    <div>
+      <h2 class="sec-title">最新文章</h2>
+      <p class="sec-sub">记录学习、思考与技术实践</p>
+    </div>
+    <a class="more-link" href="{{ '/archives/' | relative_url }}">浏览全部 →</a>
+  </div>
+
+  <ol class="card-grid">
+    {% for post in site.posts %}
+    <li>
+      <a class="card" href="{{ post.url | relative_url }}" data-reveal>
+        {% if post.cover %}
+        <div class="card-media"><img src="{{ post.cover }}" alt="{{ post.title }}" loading="lazy"></div>
+        {% else %}
+        <div class="card-media card-media-fallback"><span>{{ post.title }}</span></div>
+        {% endif %}
+        <div class="card-body">
+          <span class="tag{% if post.topmost %} top{% endif %}">{% if post.topmost %}置顶{% elsif post.categories.size > 0 %}{{ post.categories.first }}{% else %}随笔{% endif %}</span>
+          <h3>{{ post.title }}</h3>
+          <p>{{ post.excerpt | strip_html | strip | truncate: 80 }}</p>
+          <div class="meta">{{ post.date | date: "%Y/%m/%d" }}<span class="dot"></span>约 {{ post.content | strip_html | strip_newlines | remove: " " | size | divided_by: 400 | plus: 1 }} 分钟</div>
+        </div>
+      </a>
+    </li>
+    {% endfor %}
+  </ol>
+
+  {% if site.posts.size == 0 %}
+  <p style="color:var(--text-soft)">还没有文章，去 <code>_posts/</code> 写下第一篇吧。</p>
+  {% endif %}
+</section>
+

@@ -1,0 +1,272 @@
+<!DOCTYPE html><html lang="zh-CN" prefix="og: http://ogp.me/ns#"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Vsftpd部署使用 &mdash; 朱名斐的博客</title><script> (function(){var d=document.documentElement; try{var t=localStorage.getItem('shuimo-theme'); if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'; d.dataset.theme=t;}catch(e){d.dataset.theme='light';} /* 标记 JS 可用：滚动进场动画只在 .js 下隐藏元素， 禁用 JS 时内容照常可见，不会白屏 */ d.classList.add('js');})(); </script><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.7.0/style.css" media="print" onload="this.media='all'"> <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.7.0/style.css"></noscript><link rel="stylesheet" href="/assets/css/shuimo.css?v=1791625166"> <script defer src="/assets/js/shuimo.js?v=1791625166"></script><link rel="canonical" href="http://0.0.0.0:4000/2026/10/10/vsftpd/"><link rel="alternate" type="application/atom+xml" title="朱名斐的博客" href="http://0.0.0.0:4000/feed.xml"><link rel="shortcut icon" href="/favicon.ico"><meta property="og:title" content="Vsftpd部署使用"><meta name="keywords" content="博客, 朱名斐, 开始"><meta name="description" content="1、Vsftpd介绍与安装"><meta property="og:description" content="1、Vsftpd介绍与安装"><meta property="og:url" content="http://0.0.0.0:4000/2026/10/10/vsftpd/"><meta property="og:site_name" content="朱名斐的博客"><meta property="og:type" content="article"><meta property="og:locale" content="zh_CN"><meta property="article:published_time" content="2026-10-10"> <script type="application/ld+json"> {"@context":"https://schema.org","@type":"BlogPosting","headline":"Vsftpd部署使用","datePublished":"2026-10-10T11:00:00+08:00","author":{"@type":"Person","name":"朱名斐"},"publisher":{"@type":"Organization","name":"朱名斐的博客"},"mainEntityOfPage":"http://0.0.0.0:4000/2026/10/10/vsftpd/","description":"技术博客：Vsftpd。"} </script></head><body class=""><div class="fog"><span class="a"></span><span class="b"></span><span class="c"></span></div><div class="progress" id="progress"></div><header class="site-header"> <a class="brand" href="/" title="朱名斐的博客"><span class="drop"></span>朱名斐的博客</a><nav class="nav" id="nav" role="navigation"> <a class="navlink " href="/" title="首页">首页</a> <a class="navlink " href="/archives/" title="归档">归档</a> <a class="navlink " href="/categories/" title="分类">分类</a> <a class="navlink " href="/about/" title="关于">关于</a> <button class="toggle" id="search-btn" type="button" aria-label="搜索文章"> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.2-4.2"/></svg> </button> <button class="toggle" id="theme-toggle" type="button" aria-label="切换深浅色"> <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg> <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg> </button> <button class="menu-btn" id="menu-btn" type="button" aria-label="菜单"> <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg> </button></nav></header><div class="search-overlay" id="search-overlay" hidden><div class="search-box"><div class="search-bar"> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.2-4.2"/></svg> <input type="search" id="search-input" placeholder="搜索文章标题、正文、分类…" autocomplete="off" spellcheck="false"> <kbd>Esc</kbd></div><div class="search-results" id="search-results"></div></div></div><article><header class="post-head wrap"> <span class="tag">Linux基础</span><h1>Vsftpd部署使用</h1><div class="meta"> <span>2026 年 10 月 10 日</span> <span>约 9857 字 · 25 分钟</span> <a href="/categories/#Linux基础" title="Linux基础">Linux基础</a></div><div class="post-divider"></div></header><div class="wrap"><div class="article markdown-body"><h2 id="1vsftpd介绍与安装">1、Vsftpd介绍与安装</h2><h4 id="11-ftp协议">1.1 Ftp协议</h4><p>​ FTP（File Transfer Protocol，文件传输协议）是一种用于在计算机网络上进行文件传输的标准协议。它允许用户从一台计算机向另一台计算机上传或下载文件。FTP的工作原理涉及到客户端和服务器之间的交互，以及数据传输的过程。早期浏览器和windows资源管理器都支持直接打开ftp协议，后来因为安全问题禁止了</p><p><strong>01 Ftp的工作流程</strong></p><p>​ 当FTP客户端要上传／下载文件时，通过与服务端21号端口建立于 TCP之上的控制连接，当服务端收到命令之后，立即进行验证或者响应（如：用户名和密码验证，文件传输命令等）。服务端收到文件传输命令时就需要和客户端建立一个数据连接通道用于传输文件，这个连接的建立可以由客户端主动发起，也可以由服务端发起。</p><p>​ 数据连接并不是永久性存在的，一旦传输完毕就会将这个连接关闭掉，对于控制连接，只有关闭客户端控制连接才会随之关闭，控制连接是随客户端一起存在的。而数据连接是短暂存在的，只要文件／列表传输完成，数据连接就关闭了。</p><p>FTP协议有主动式和被动式两种工作方式，主动与被动是针对服务器是否主动发起数据连接而言的。</p><p><strong>02 Ftp主动模式（Port模式）</strong></p><p>​ 在Port模式下，FTP 客户端首先和FTP服务器的TCP 21端口建立连接，通过这个通道发送命令，客户端需要接收数据的时候在这个通道上发送 <code class="language-plaintext highlighter-rouge">PORT</code> 命令。 PORT命令包含了客户端用什么端口接收数据。在传送数据的时候，服务器端通过自己的TCP 20端口主动连接至客户端的指定端口发送数据。 FTP server必须和客户端建立一个新的连接用来传送数据。</p><p>​ 这个模式的问题在于，当客户端是内网设备时，通常有防火墙或NAT（网络地址转换）设备保护。来自外网服务器的连接请求，很容易被客户端的防火墙拦截导致数据连接失败。原因是主动模式的核心逻辑是服务器主动连接客户端且客户端的端口随机</p><p><strong>03 Ftp被动模式（Pasv模式）</strong></p><p>​ 在Pasv模式下，FTP客户端首先和FTP服务器的TCP 21端口建立连接，通过这个通道发送命令。当客户端需要接收数据时，它在这个通道上发送 <code class="language-plaintext highlighter-rouge">PASV</code> 命令。服务器收到PASV命令后，会开启一个随机的高位端口（比如端口2024），并通过控制通道将这个端口号告诉客户端。在传送数据时，由客户端主动从自己的另一个随机端口，连接至服务器指定的那个随机端口，从而建立一个新的数据连接。</p><p>​ 这个模式很好地解决了主动模式的问题，因为数据连接是由客户端主动发起的，可以顺利穿透客户端的防火墙或NAT设备。但其问题在于，服务器端需要开放一个随机的高位端口范围供客户端连接，如果服务器防火墙配置不当，只开放了21端口，被动模式的数据连接同样会失败。此外客户端或服务器使用NAT时，IP地址映射可能出现不一致，导致连接失败。</p><p>在实际使用中建议优先选择被动模式，开放服务器21端口和一个范围端口（如40000~65535）</p><h4 id="12-vsftpd安装">1.2 Vsftpd安装</h4><p>Vsftpd是一个完全免费开源的ftp服务器软件，特点是小巧轻快，安全易用，支持虚拟用户，支持带宽限制。官网：https://security.appspot.com/vsftpd.html</p><p>一般来说各大Linux发行商的软件源都已内置了vsftpd，如果使用不了软件源可以去官网下载源码包</p><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># apt -y install vsftpd tnftp</span>
+<span class="c"># wget https://security.appspot.com/downloads/vsftpd-3.0.5.tar.gz</span>
+
+<span class="nv">$ </span>yum <span class="nt">-y</span> <span class="nb">install </span>vsftpd ftp
+<span class="nv">$ </span>rpm <span class="nt">-ql</span> vsftpd
+/etc/vsftpd						<span class="c"># 配置目录</span>
+/etc/vsftpd/vsftpd.conf			<span class="c"># 配置文件</span>
+</code></pre></div></div><h2 id="2vsftpd配置启动">2、Vsftpd配置启动</h2><p>配置文件说明：http://vsftpd.beasts.org/vsftpd_conf.html</p><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cp</span> <span class="nt">-a</span> /etc/vsftpd/vsftpd.conf<span class="o">{</span>,.bak<span class="o">}</span>
+<span class="nv">$ </span><span class="nb">grep</span> <span class="nt">-Ev</span> <span class="s1">'^#|^$'</span> /etc/vsftpd/vsftpd.conf
+</code></pre></div></div><h4 id="21-全局配置">2.1 全局配置</h4><p>Vsftpd的配置涉及到的内容比较多，如监听地址与日志配置、运行模式配置、其他全局配置、用户配置、权限配置、兼容配置、证书配置。</p><p><strong>01 监听IP端口、日志配置</strong></p><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 需要注意,实际应用中vsftpd不支持在行内添加注释,启动会报错。只支持整行注释</span>
+<span class="nv">listen</span><span class="o">=</span>YES								<span class="c"># 开启网络地址监听</span>
+<span class="nv">listen_ipv6</span><span class="o">=</span>NO							<span class="c"># 不监听IPV6地址</span>
+<span class="nv">listen_port</span><span class="o">=</span>21							<span class="c"># 服务监听端口</span>
+<span class="nv">idle_session_timeout</span><span class="o">=</span>600				<span class="c"># 空闲会话超时时间(单位s)</span>
+<span class="nv">use_localtime</span><span class="o">=</span>NO						<span class="c"># 是否使用本地时区时间(默认显示为GMT)</span>
+
+<span class="c"># 日志配置</span>
+<span class="nv">xferlog_enable</span><span class="o">=</span>YES						<span class="c"># 开启日志</span>
+<span class="nv">xferlog_std_format</span><span class="o">=</span>YES					<span class="c"># 使用旧的wu-ftpd标准格式</span>
+<span class="nv">xferlog_file</span><span class="o">=</span>/var/log/xferlog			<span class="c"># wu-ftpd标准格式日志</span>
+<span class="nv">dual_log_enable</span><span class="o">=</span>YES						<span class="c"># 同时再写一份vsftpd自有格式日志</span>
+<span class="nv">vsftpd_log_file</span><span class="o">=</span>/var/log/vsftpd.log		<span class="c"># vsftpd自有格式日志文件路径</span>
+</code></pre></div></div><p><strong>02 主/被动模式配置</strong></p><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 主动模式配置</span>
+<span class="nv">port_enable</span><span class="o">=</span>YES							<span class="c"># 是否开启主动模式</span>
+<span class="nv">ftp_data_port</span><span class="o">=</span>20						<span class="c"># 主动模式中服务器用于发起连接的固定源端口(默认20)</span>
+<span class="nv">connect_from_port_20</span><span class="o">=</span>YES				<span class="c"># 主动模式是否固定使用特定端口来发起数据连接,如果YES则使用ftp_data_port指定的端口,NO则随机端口</span>
+
+<span class="c"># 被动模式配置</span>
+<span class="nv">pasv_enable</span><span class="o">=</span>YES							<span class="c"># 是否开启被动模式</span>
+<span class="nv">pasv_min_port</span><span class="o">=</span>40000						<span class="c"># 被动模式下,数据链接使用的最小端口</span>
+<span class="nv">pasv_max_port</span><span class="o">=</span>60000						<span class="c"># 被动模式下,数据链接使用的最大端口(实际使用的端口是最小端口到最大端口之间的范围)</span>
+<span class="nv">pasv_address</span><span class="o">=</span>ftp.zmf.org				<span class="c"># 当服务器位于内网时,它告诉客户端使用这个公网IP地址来建立数据连接,可以写成域名或IP</span>
+<span class="nv">pasv_addr_resolve</span><span class="o">=</span>YES					<span class="c"># 启动时动态解析pasv_address中指定的域名</span>
+</code></pre></div></div><p><strong>03 其他全局配置</strong></p><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">delete_failed_uploads</span><span class="o">=</span>YES				<span class="c"># 删除上传异常的文件(但实测没有生效,不清楚)</span>
+<span class="nv">ascii_upload_enable</span><span class="o">=</span>YES					<span class="c"># 上传时是否默认使用ASCII模式传输,默认no（CRLF换行符转为LF换行符）</span>
+<span class="nv">ascii_download_enable</span><span class="o">=</span>YES				<span class="c"># 下载时是否默认使用ASCII模式传输,默认no</span>
+<span class="nv">max_clients</span><span class="o">=</span>1000						<span class="c"># 指定最大连接数</span>
+<span class="nv">max_per_ip</span><span class="o">=</span>100							<span class="c"># 每个IP的最大连接数(默认0不限制)</span>
+</code></pre></div></div><h4 id="22-用户配置">2.2 用户配置</h4><p><strong>01 本地用户模式和匿名用户模式</strong></p><ul><li>本地用户模式就是让用户直接用Linux系统账号密码来登录FTP服务器</li><li>匿名用户模式就是访客模式，无密码（默认要输假密码）的方式，匿名用户名为 <code class="language-plaintext highlighter-rouge">anonymous</code> 或 <code class="language-plaintext highlighter-rouge">ftp</code>（需要注意虚拟用户映射的系统用户，对于禁锢根目录的权限）</li></ul><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 本地用户模式配置(默认映射系统用户ftp)</span>
+<span class="nv">local_enable</span><span class="o">=</span>YES						<span class="c"># 是否允许本地用户登录</span>
+<span class="nv">chroot_local_user</span><span class="o">=</span>YES					<span class="c"># 将本地用户禁锢在它的家目录,无法浏览系统其他目录</span>
+<span class="nv">allow_writeable_chroot</span><span class="o">=</span>YES				<span class="c"># 被禁锢的根目录是否可写</span>
+<span class="nv">write_enable</span><span class="o">=</span>YES						<span class="c"># 用户登录是否允许写(所有用户通用选项,需要配合系统用户权限)</span>
+<span class="nv">chmod_enable</span><span class="o">=</span>NO							<span class="c"># 是否允许本地用户登录使用SITE CHMOD命令修改文件的权限</span>
+<span class="nv">userlist_enable</span><span class="o">=</span>YES						<span class="c"># 是否启用用户列表</span>
+<span class="nv">userlist_file</span><span class="o">=</span>/etc/vsftpd/user_list		<span class="c"># 指定用户列表访问控制文件,默认/etc/vsftpd/user_list</span>
+<span class="nv">userlist_deny</span><span class="o">=</span>NO						<span class="c"># 为YES时列表文件相当于黑名单。为NO时列表文件相当于白名单</span>
+
+<span class="c"># 匿名用户模式配置</span>
+<span class="nv">anonymous_enable</span><span class="o">=</span>YES					<span class="c"># 是否支持匿名用户</span>
+<span class="nv">no_anon_password</span><span class="o">=</span>YES					<span class="c"># 匿名用户是否完全需要密码</span>
+<span class="nv">anon_world_readable_only</span><span class="o">=</span>NO				<span class="c"># 启用时,将只允许匿名用户下载具有全球读权限的文件</span>
+<span class="nv">anon_root</span><span class="o">=</span>/var/ftp						<span class="c"># 设置虚拟用户的根目录</span>
+<span class="nv">anon_upload_enable</span><span class="o">=</span>YES					<span class="c"># 是否允许匿名用户上传文件</span>
+<span class="nv">chown_uploads</span><span class="o">=</span>YES						<span class="c"># 匿名用户上传文件时,是否允许将属主修改为指定的用户,如果为no默认为ftp</span>
+<span class="nv">chown_username</span><span class="o">=</span>ftp						<span class="c"># 设置匿名用户上传文件后的属主为指定的系统用户</span>
+<span class="nv">chown_upload_mode</span><span class="o">=</span>0644					<span class="c"># 设置匿名用户上传文件后的权限值</span>
+<span class="nv">anon_umask</span><span class="o">=</span>022							<span class="c"># 设置匿名用户权限掩码</span>
+<span class="nv">write_enable</span><span class="o">=</span>YES						<span class="c"># 用户登录是否允许写</span>
+<span class="nv">anon_other_write_enable</span><span class="o">=</span>YES				<span class="c"># 是否允许匿名用户删除/重命名文件</span>
+<span class="nv">anon_mkdir_write_enable</span><span class="o">=</span>YES				<span class="c"># 是否允许匿名用户创建目录</span>
+</code></pre></div></div><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 关于匿名用户的权限问题,Ftp对于匿名用户的权限限制是根目录不允许写</span>
+<span class="c"># 甚至文件系统上如果指定了根目录可写会报错：500 OOPS: vsftpd: refusing to run with writable root inside chroot()</span>
+<span class="c"># 如果想让匿名用户写,需要根目录设置只读,子目录可写</span>
+<span class="nv">$ </span><span class="nb">mkdir</span> <span class="nt">-p</span> /var/ftp/pub
+<span class="nv">$ </span><span class="nb">chown</span> <span class="nt">-R</span> ftp.ftp /var/ftp
+<span class="nv">$ </span><span class="nb">chmod </span>555 /var/ftp
+<span class="nv">$ </span><span class="nb">chmod</span> <span class="nt">-R</span> 755 /var/ftp/pub
+</code></pre></div></div><p><strong>02 虚拟用户模式</strong></p><p>虚拟用户（Guest）是一种独立于系统账号、仅用于FTP服务的登录账户，通过映射到本地系统用户来操作文件，安全性更高。虚拟用户模式比较复杂，配置流程大体分为：</p><ol><li>准备Vsftpd虚拟用户配置</li><li>准备用户名密码凭证、生成用户数据库、配置PAM</li><li>准备虚拟用户子配置文件</li><li>创建宿主机目录，确保映射用户的权限</li></ol><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 虚拟用户登录配置</span>
+<span class="nv">local_enable</span><span class="o">=</span>YES						<span class="c"># 虚拟账户依赖本地用户框架,引用开启本地用户模式配置</span>
+<span class="nv">chroot_local_user</span><span class="o">=</span>YES					<span class="c"># 虚拟账户依赖本地用户框架,引用本地用户禁锢根目录配置</span>
+<span class="nv">write_enable</span><span class="o">=</span>YES						<span class="c"># 用户登录是否允许写</span>
+
+<span class="nv">guest_enable</span><span class="o">=</span>YES						<span class="c"># 启用虚拟用户模式</span>
+<span class="nv">guest_username</span><span class="o">=</span>vuser					<span class="c"># 指定虚拟用户默认映射的系统用户</span>
+<span class="nv">pam_service_name</span><span class="o">=</span>vsftpd.virtual			<span class="c"># 虚拟用户所使用的pam配置文件,指向的是/etc/pam.d/下的一个服务名</span>
+<span class="nv">virtual_use_local_privs</span><span class="o">=</span>YES				<span class="c"># 指定虚拟用户和本地用户一样的权限,否则会使用匿名用户的权限导致权限被拒绝</span>
+<span class="nv">user_config_dir</span><span class="o">=</span>/etc/vsftpd/conf.d		<span class="c"># 虚拟用户配置文件子目录(以虚拟用户名命名)</span>
+</code></pre></div></div><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 生成虚拟用户凭证.奇数行为用户名,偶数行为密码</span>
+<span class="nv">$ </span>vim /etc/vsftpd/vusers.txt
+zmf
+123456
+
+<span class="c"># 生成用户数据库认证文件</span>
+<span class="nv">$ </span>db_load <span class="nt">-T</span> <span class="nt">-t</span> <span class="nb">hash</span> <span class="nt">-f</span> /etc/vsftpd/vusers.txt /etc/vsftpd/vusers.db
+<span class="nv">$ </span><span class="nb">chmod </span>600 /etc/vsftpd/vusers.<span class="k">*</span>
+
+<span class="c"># 创建pam认证</span>
+<span class="nv">$ </span>vim /etc/pam.d/vsftpd.virtual
+auth required pam_userdb.so <span class="nv">db</span><span class="o">=</span>/etc/vsftpd/vusers
+account required pam_userdb.so <span class="nv">db</span><span class="o">=</span>/etc/vsftpd/vusers
+
+<span class="c"># 生成虚拟用户子配置文件(以虚拟用户名命名)</span>
+<span class="nv">$ </span>vim /etc/vsftpd/conf.d/zmf
+<span class="nv">chroot_local_user</span><span class="o">=</span>YES				<span class="c"># 引用本地用户禁锢根目录配置</span>
+<span class="nv">guest_username</span><span class="o">=</span>vuser				<span class="c"># 在虚拟用户子配置文件里也可以指定映射用户,优先级比全局配置文件里更高</span>
+<span class="nv">local_root</span><span class="o">=</span>/home/vuser/ftp			<span class="c"># 指定这个虚拟用户禁锢的根目录</span>
+<span class="nv">write_enable</span><span class="o">=</span>YES					<span class="c"># 用户是否可写</span>
+<span class="nv">allow_writeable_chroot</span><span class="o">=</span>YES			<span class="c"># 启用可写入的chroot根目录</span>
+<span class="nv">local_max_rate</span><span class="o">=</span>10485760				<span class="c"># 限制该用户的下载速度（单位:字节/秒,10485760=10MB/s）</span>
+
+<span class="c"># 创建对应的系统用户,并设置好权限</span>
+<span class="nv">$ </span>useradd <span class="nt">-s</span> /sbin/nologin vuser
+<span class="c"># 确保安全,再将用户禁用</span>
+<span class="nv">$ </span>usermod <span class="nt">-L</span> vuser
+<span class="nv">$ </span><span class="nb">mkdir</span> /home/vuser/ftp
+<span class="nv">$ </span><span class="nb">chown</span> <span class="nt">-R</span> vuser:vuser /home/vuser
+</code></pre></div></div><p><strong>03 后期增加虚拟用户</strong></p><p>要求增加一个虚拟用户，权限是root用户的权限，根目录锁在/root</p><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 添加一个虚拟用户v_root</span>
+<span class="nv">$ </span>vim /etc/vsftpd/vusers.txt
+zmf
+123456
+v_root
+123456
+
+<span class="nv">$ </span>db_load <span class="nt">-T</span> <span class="nt">-t</span> <span class="nb">hash</span> <span class="nt">-f</span> /etc/vsftpd/vusers.txt /etc/vsftpd/vusers.db
+<span class="nv">$ </span><span class="nb">chmod </span>600 /etc/vsftpd/vusers.<span class="k">*</span>
+<span class="nv">$ </span>vim /etc/vsftpd/conf.d/v_root
+<span class="nv">guest_username</span><span class="o">=</span>root
+<span class="nv">local_root</span><span class="o">=</span>/root
+<span class="nv">write_enable</span><span class="o">=</span>YES
+<span class="nv">allow_writeable_chroot</span><span class="o">=</span>YES
+<span class="nv">local_max_rate</span><span class="o">=</span>10485760
+
+<span class="nv">$ </span>systemctl restart vsftpd
+</code></pre></div></div><h4 id="23-推荐配置">2.3 推荐配置</h4><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cp</span> <span class="nt">-a</span> /etc/vsftpd/vsftpd.conf<span class="o">{</span>,.bak<span class="o">}</span>
+<span class="nv">$ </span>vim /etc/vsftpd/vsftpd.conf
+<span class="c"># 全局配置</span>
+<span class="nv">listen</span><span class="o">=</span>YES
+<span class="nv">listen_ipv6</span><span class="o">=</span>NO
+<span class="nv">listen_port</span><span class="o">=</span>21
+<span class="nv">idle_session_timeout</span><span class="o">=</span>600
+<span class="nv">use_localtime</span><span class="o">=</span>NO
+<span class="nv">xferlog_enable</span><span class="o">=</span>YES
+<span class="nv">xferlog_std_format</span><span class="o">=</span>NO
+<span class="nv">dual_log_enable</span><span class="o">=</span>NO
+<span class="nv">vsftpd_log_file</span><span class="o">=</span>/var/log/vsftpd.log
+<span class="nv">max_clients</span><span class="o">=</span>1000
+<span class="nv">max_per_ip</span><span class="o">=</span>100
+<span class="nv">delete_failed_uploads</span><span class="o">=</span>YES
+
+<span class="c"># 运行模式配置,仅开启被动模式</span>
+<span class="nv">port_enable</span><span class="o">=</span>NO
+<span class="nv">pasv_enable</span><span class="o">=</span>YES
+<span class="nv">pasv_min_port</span><span class="o">=</span>40000
+<span class="nv">pasv_max_port</span><span class="o">=</span>60000
+<span class="c"># pasv_address=ftp.zmf.org</span>
+<span class="c"># pasv_addr_resolve=YES</span>
+
+<span class="c"># 用户配置</span>
+<span class="c"># 方案一、用户配置,仅允许虚拟用户模式</span>
+<span class="nv">anonymous_enable</span><span class="o">=</span>NO
+<span class="nv">local_enable</span><span class="o">=</span>YES
+<span class="nv">chroot_local_user</span><span class="o">=</span>YES
+<span class="nv">virtual_use_local_privs</span><span class="o">=</span>YES
+<span class="nv">guest_enable</span><span class="o">=</span>YES
+<span class="nv">guest_username</span><span class="o">=</span>vuser
+<span class="nv">local_root</span><span class="o">=</span>/home/vuser/ftp
+<span class="nv">allow_writeable_chroot</span><span class="o">=</span>YES
+<span class="nv">pam_service_name</span><span class="o">=</span>vsftpd.virtual
+<span class="nv">user_config_dir</span><span class="o">=</span>/etc/vsftpd/conf.d
+
+<span class="c"># 方案二、快速交付-仅允许匿名用户模式（允许匿名用户上传下载删除）</span>
+<span class="c"># 但需要确保虚拟用户映射的系统用户,对于禁锢根目录下的子目录权限</span>
+<span class="nv">local_enable</span><span class="o">=</span>NO
+<span class="nv">guest_enable</span><span class="o">=</span>NO
+<span class="nv">anonymous_enable</span><span class="o">=</span>YES
+<span class="nv">no_anon_password</span><span class="o">=</span>YES
+<span class="nv">anon_world_readable_only</span><span class="o">=</span>NO
+<span class="nv">anon_root</span><span class="o">=</span>/var/ftp
+<span class="nv">chown_uploads</span><span class="o">=</span>YES
+<span class="nv">anon_upload_enable</span><span class="o">=</span>YES
+<span class="nv">chown_username</span><span class="o">=</span>ftp
+<span class="nv">chown_upload_mode</span><span class="o">=</span>0644
+<span class="nv">anon_umask</span><span class="o">=</span>022
+<span class="nv">write_enable</span><span class="o">=</span>YES
+<span class="nv">anon_other_write_enable</span><span class="o">=</span>YES
+<span class="nv">anon_mkdir_write_enable</span><span class="o">=</span>YES
+</code></pre></div></div><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 方案一后续操作</span>
+<span class="c"># 生成虚拟用户pam认证</span>
+<span class="nv">$ </span>vim /etc/vsftpd/vusers.txt
+zmf
+123456
+
+<span class="nv">$ </span>db_load <span class="nt">-T</span> <span class="nt">-t</span> <span class="nb">hash</span> <span class="nt">-f</span> /etc/vsftpd/vusers.txt /etc/vsftpd/vusers.db
+<span class="nv">$ </span><span class="nb">chmod </span>600 /etc/vsftpd/vusers.<span class="k">*</span>
+<span class="nv">$ </span>vim /etc/pam.d/vsftpd.virtual
+auth required pam_userdb.so <span class="nv">db</span><span class="o">=</span>/etc/vsftpd/vusers
+account required pam_userdb.so <span class="nv">db</span><span class="o">=</span>/etc/vsftpd/vusers
+
+<span class="nv">$ </span><span class="nb">mkdir</span> /etc/vsftpd/conf.d
+<span class="nv">$ </span>vim /etc/vsftpd/conf.d/zmf
+<span class="nv">local_root</span><span class="o">=</span>/home/vuser/ftp
+<span class="nv">write_enable</span><span class="o">=</span>YES
+<span class="nv">allow_writeable_chroot</span><span class="o">=</span>YES
+<span class="nv">local_max_rate</span><span class="o">=</span>10485760
+
+<span class="nv">$ </span><span class="nb">mkdir</span> <span class="nt">-p</span> /home/vuser/ftp
+<span class="nv">$ </span>useradd <span class="nt">-s</span> /sbin/nologin <span class="nt">-d</span> /home/vuser vuser
+<span class="nv">$ </span><span class="nb">chown</span> <span class="nt">-R</span> vuser:vuser /home/vuser
+
+<span class="c"># 方案二后续操作</span>
+<span class="nv">$ </span><span class="nb">mkdir</span> <span class="nt">-p</span> /var/ftp/pub
+<span class="nv">$ </span><span class="nb">chown</span> <span class="nt">-R</span> ftp.ftp /var/ftp
+<span class="nv">$ </span><span class="nb">chmod </span>555 /var/ftp
+<span class="nv">$ </span><span class="nb">chmod</span> <span class="nt">-R</span> 755 /var/ftp/pub
+
+<span class="c"># 最终启动服务</span>
+<span class="nv">$ </span>systemctl <span class="nb">enable</span> <span class="nt">--now</span> vsftpd
+<span class="nv">$ </span>systemctl status vsftpd
+</code></pre></div></div><h4 id="24-证书加密ftps">2.4 证书加密Ftps</h4><p>需要注意，FTPS和SFTP不是一个意思，FTPS是“加了加密层的FTP”，而SFTP则是“SSH协议中的一个文件传输子系统”</p><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># vsftpd证书配置</span>
+<span class="nv">ssl_enable</span><span class="o">=</span>YES									<span class="c"># 启用 SSL/TLS</span>
+<span class="nv">allow_anon_ssl</span><span class="o">=</span>NO								<span class="c"># 是否允许匿名用户使用SSL连接</span>
+<span class="nv">force_local_logins_ssl</span><span class="o">=</span>YES						<span class="c"># 所有的非匿名用户登录时都被强制使用SSL连接</span>
+<span class="nv">force_local_data_ssl</span><span class="o">=</span>YES						<span class="c"># 所有的非匿名用户传输数据时都被强制使用SSL连接</span>
+<span class="nv">ssl_sslv2</span><span class="o">=</span>NO									<span class="c"># 禁用不安全的SSLv2协议</span>
+<span class="nv">ssl_sslv3</span><span class="o">=</span>NO									<span class="c"># 禁用不安全的SSLv3协议</span>
+<span class="nv">ssl_tlsv1</span><span class="o">=</span>YES									<span class="c"># 允许TLS协议</span>
+<span class="nv">ssl_ciphers</span><span class="o">=</span>HIGH								<span class="c"># 允许使用HASH算法</span>
+<span class="c"># 指定RSA证书公钥和私钥文件</span>
+<span class="c"># 绝大部分场景使用的都是RSA证书,如果指定DSA证书,配置项为dsa_cert_file</span>
+<span class="nv">rsa_cert_file</span><span class="o">=</span>/etc/vsftpd/ssl/ftp.zmf.org.pem
+<span class="nv">rsa_private_key_file</span><span class="o">=</span>/etc/vsftpd/ssl/ftp.zmf.org.key
+</code></pre></div></div><blockquote><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c">#!/bin/bash</span>
+  <span class="c"># 生成测试证书Shell脚本</span>
+  <span class="nv">Domain</span><span class="o">=</span><span class="s2">"ftp.zmf.org"</span>
+  <span class="nv">ca_dir</span><span class="o">=</span><span class="s2">"/etc/vsftpd/ssl/ca"</span>
+
+  <span class="nb">mkdir</span> <span class="nt">-p</span> <span class="k">${</span><span class="nv">ca_dir</span><span class="k">}</span>
+  openssl genrsa <span class="nt">-out</span> <span class="k">${</span><span class="nv">ca_dir</span><span class="k">}</span>/ca.key 4096
+  openssl req <span class="nt">-x509</span> <span class="nt">-new</span> <span class="nt">-nodes</span> <span class="nt">-sha512</span> <span class="nt">-days</span> 36500 <span class="nt">-subj</span> <span class="s2">"/C=CN/ST=Beijing/L=Beijing/O=example/OU=Personal/CN=</span><span class="k">${</span><span class="nv">Domain</span><span class="k">}</span><span class="s2">"</span> <span class="nt">-key</span> <span class="k">${</span><span class="nv">ca_dir</span><span class="k">}</span>/ca.key <span class="nt">-o</span>
+  ut <span class="k">${</span><span class="nv">ca_dir</span><span class="k">}</span>/ca.crt
+  openssl genrsa <span class="nt">-out</span> <span class="k">${</span><span class="nv">Domain</span><span class="k">}</span>.key 4096
+  openssl req <span class="nt">-sha512</span> <span class="nt">-new</span> <span class="nt">-subj</span> <span class="s2">"/C=CN/ST=Beijing/L=Beijing/O=example/OU=Personal/CN=</span><span class="k">${</span><span class="nv">Domain</span><span class="k">}</span><span class="s2">"</span> <span class="nt">-key</span> <span class="k">${</span><span class="nv">Domain</span><span class="k">}</span>.key <span class="nt">-out</span> <span class="k">${</span><span class="nv">Domain</span><span class="k">}</span>.csr
+  openssl x509 <span class="nt">-req</span> <span class="nt">-sha512</span> <span class="nt">-days</span> 36500 <span class="nt">-CA</span> <span class="k">${</span><span class="nv">ca_dir</span><span class="k">}</span>/ca.crt <span class="nt">-CAkey</span> <span class="k">${</span><span class="nv">ca_dir</span><span class="k">}</span>/ca.key <span class="nt">-CAcreateserial</span> <span class="nt">-in</span> <span class="k">${</span><span class="nv">Domain</span><span class="k">}</span>.csr <span class="nt">-out</span> <span class="k">${</span><span class="nv">Domain</span><span class="k">}</span>.crt
+  <span class="nb">cat</span> <span class="k">${</span><span class="nv">Domain</span><span class="k">}</span>.crt <span class="k">${</span><span class="nv">ca_dir</span><span class="k">}</span>/ca.crt <span class="o">&gt;</span> <span class="k">${</span><span class="nv">Domain</span><span class="k">}</span>.pem
+  <span class="nb">chmod </span>600 <span class="k">${</span><span class="nv">Domain</span><span class="k">}</span>.key <span class="k">${</span><span class="nv">Domain</span><span class="k">}</span>.crt <span class="k">${</span><span class="nv">Domain</span><span class="k">}</span>.pem
+</code></pre></div></div></blockquote><h4 id="25-客户端连接ftp">2.5 客户端连接Ftp</h4><ul><li>Windows系统推荐可视化客户端工具FileZilla，中文官网：https://www.filezillla.cn/</li><li>Linux推荐ftp命令</li></ul><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># ftp命令使用</span>
+<span class="nv">$ </span>ftp &lt;选项&gt; &lt;服务器IP或域名&gt; &lt;命令端口<span class="o">(</span>默认21<span class="o">)&gt;</span>
+<span class="c"># 常用选项</span>
+<span class="nt">-p</span>			<span class="c"># 启用被动模式</span>
+<span class="nt">-i</span>			<span class="c"># 关闭交互式提示</span>
+<span class="nt">-n</span>			<span class="c"># 禁止自动登录。阻止尝试使用.netrc文件进行自动登录</span>
+
+<span class="nv">$ </span>ftp <span class="nt">-p</span> 192.168.7.159 21
+Connected to 192.168.7.159 <span class="o">(</span>192.168.7.159<span class="o">)</span><span class="nb">.</span>
+220 <span class="o">(</span>vsFTPd 3.0.2<span class="o">)</span>
+Name <span class="o">(</span>192.168.7.159:root<span class="o">)</span>: zmf					<span class="c"># 输入用户名</span>
+331 Please specify the password.				<span class="c"># 输入密码</span>
+Password:
+230 Login successful.
+Remote system <span class="nb">type </span>is UNIX.
+Using binary mode to transfer files.
+ftp&gt; 											<span class="c"># 进入ftp交互式终端</span>
+
+<span class="c"># ftp交互式终端指令使用</span>
+<span class="nb">help</span>								<span class="c"># 显示所有可用的ftp命令列表</span>
+<span class="nb">ls</span> / <span class="nb">dir</span>							<span class="c"># 列出远程服务器当前目录下的文件和文件夹</span>
+<span class="nb">cd</span> &lt;<span class="nb">dir</span><span class="o">&gt;</span>							<span class="c"># 切换目录</span>
+lcd &lt;<span class="nb">dir</span><span class="o">&gt;</span>							<span class="c"># 切换本地计算机上的当前工作目录</span>
+get &lt;remote-file&gt; &lt;local-file&gt;		<span class="c"># 下载一个文件,如果不指定本地文件名,会使用远程文件的名称</span>
+put &lt;local-file&gt; &lt;remote-file&gt;		<span class="c"># 上传一个文件,如果不指定远程文件名,会使用本地文件的名称</span>
+mget &lt;通配符&gt;						  <span class="c"># 批量下载多个文件，例如 mget *.txt 会下载所有文本文件</span>
+mput &lt;通配符&gt;						  <span class="c"># 批量上传多个文件</span>
+delete &lt;remote-file&gt;				<span class="c"># 删除远程服务器上的指定文件</span>
+<span class="nb">mkdir</span> &lt;<span class="nb">dir</span><span class="o">&gt;</span>							<span class="c"># 在远程服务器上创建一个新目录</span>
+<span class="nb">rmdir</span> &lt;<span class="nb">dir</span><span class="o">&gt;</span>							<span class="c"># 删除远程服务器上的一个目录</span>
+binary								<span class="c"># 切换为二进制传输模式,传输非文本文件（如图片、压缩包）时必须使用此模式,否则文件会损坏</span>
+ascii								<span class="c"># 切换为ASCII文本传输模式,这是默认模式,用于传输纯文本文件</span>
+status								<span class="c"># 查看当前状态</span>
+<span class="o">!</span>									<span class="c"># 执行本地shell命令,如 !ls 可查看本地的目录</span>
+bye / quit / <span class="nb">exit</span>					<span class="c"># 退出ftp会话</span>
+</code></pre></div></div></div></div><div class="wrap"><div class="post-foot"><div class="copyright-box"> 本文作者 <strong>朱名斐</strong>，采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a> 协议，转载请注明出处。<br> 原文链接：<a href="http://0.0.0.0:4000/2026/10/10/vsftpd/">http://0.0.0.0:4000/2026/10/10/vsftpd/</a></div><nav class="post-nav"> <a href="/2026/10/10/process/"><span class="label">← 上一篇</span><span class="t">Linux进程任务管理</span></a> <a href="/2026/10/10/dns/"><span class="label">下一篇 →</span><span class="t">Bind-DNS管理</span></a></nav></div></div><div class="comment wrap"></div></article><footer class="site-footer"><div class="wrap inner"> <a class="brand" href="/"><span class="drop"></span>朱名斐的博客</a><div class="flinks"> <a href="/">首页</a><a href="/archives/">归档</a><a href="/categories/">分类</a><a href="/about/">关于</a> <a href="/feed.xml">RSS</a> <a href="https://github.com/zmf3331" target="_blank" rel="noopener">GitHub</a></div><div>© 2026–2026 朱名斐 · 记录学习、思考与技术实践</div></div></footer></body></html>

@@ -1,0 +1,25 @@
+{% comment %}
+  评论使用 giscus。启用前请到 https://giscus.app/zh-CN 生成配置，
+  并把 repo / repo-id / category / category-id 填入 _config.yml 的 giscus 段。
+  未配置（repo 为空）时，本段不会输出任何脚本，避免控制台报错。
+{% endcomment %}
+{% if page.comments != false and site.giscus.repo and site.giscus.repo != "" %}
+{% if site.giscus.light == "light" %}{% assign giscus_theme = "light" %}{% else %}{% assign giscus_theme = site.giscus.light %}{% endif %}
+<script src="https://giscus.app/client.js"
+        data-repo="{{ site.giscus.repo }}"
+        data-repo-id="{{ site.giscus.repo-id }}"
+        data-category="{{ site.giscus.category }}"
+        data-category-id="{{ site.giscus.category-id }}"
+        data-mapping="title"
+        data-strict="1"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="{{ giscus_theme }}"
+        data-lang="zh-CN"
+        data-loading="lazy"
+        crossorigin="anonymous"
+        async>
+</script>
+{% endif %}
+

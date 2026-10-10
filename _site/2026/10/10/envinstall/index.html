@@ -1,0 +1,102 @@
+<!DOCTYPE html><html lang="zh-CN" prefix="og: http://ogp.me/ns#"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>语言环境安装 &mdash; 朱名斐的博客</title><script> (function(){var d=document.documentElement; try{var t=localStorage.getItem('shuimo-theme'); if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'; d.dataset.theme=t;}catch(e){d.dataset.theme='light';} /* 标记 JS 可用：滚动进场动画只在 .js 下隐藏元素， 禁用 JS 时内容照常可见，不会白屏 */ d.classList.add('js');})(); </script><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.7.0/style.css" media="print" onload="this.media='all'"> <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.7.0/style.css"></noscript><link rel="stylesheet" href="/assets/css/shuimo.css?v=1791625166"> <script defer src="/assets/js/shuimo.js?v=1791625166"></script><link rel="canonical" href="http://0.0.0.0:4000/2026/10/10/envinstall/"><link rel="alternate" type="application/atom+xml" title="朱名斐的博客" href="http://0.0.0.0:4000/feed.xml"><link rel="shortcut icon" href="/favicon.ico"><meta property="og:title" content="语言环境安装"><meta name="keywords" content="博客, 朱名斐, 开始"><meta name="description" content="1、Python"><meta property="og:description" content="1、Python"><meta property="og:url" content="http://0.0.0.0:4000/2026/10/10/envinstall/"><meta property="og:site_name" content="朱名斐的博客"><meta property="og:type" content="article"><meta property="og:locale" content="zh_CN"><meta property="article:published_time" content="2026-10-10"> <script type="application/ld+json"> {"@context":"https://schema.org","@type":"BlogPosting","headline":"语言环境安装","datePublished":"2026-10-10T10:00:00+08:00","author":{"@type":"Person","name":"朱名斐"},"publisher":{"@type":"Organization","name":"朱名斐的博客"},"mainEntityOfPage":"http://0.0.0.0:4000/2026/10/10/envinstall/","description":"技术博客：语言环境安装。"} </script></head><body class=""><div class="fog"><span class="a"></span><span class="b"></span><span class="c"></span></div><div class="progress" id="progress"></div><header class="site-header"> <a class="brand" href="/" title="朱名斐的博客"><span class="drop"></span>朱名斐的博客</a><nav class="nav" id="nav" role="navigation"> <a class="navlink " href="/" title="首页">首页</a> <a class="navlink " href="/archives/" title="归档">归档</a> <a class="navlink " href="/categories/" title="分类">分类</a> <a class="navlink " href="/about/" title="关于">关于</a> <button class="toggle" id="search-btn" type="button" aria-label="搜索文章"> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.2-4.2"/></svg> </button> <button class="toggle" id="theme-toggle" type="button" aria-label="切换深浅色"> <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg> <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg> </button> <button class="menu-btn" id="menu-btn" type="button" aria-label="菜单"> <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg> </button></nav></header><div class="search-overlay" id="search-overlay" hidden><div class="search-box"><div class="search-bar"> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.2-4.2"/></svg> <input type="search" id="search-input" placeholder="搜索文章标题、正文、分类…" autocomplete="off" spellcheck="false"> <kbd>Esc</kbd></div><div class="search-results" id="search-results"></div></div></div><article><header class="post-head wrap"> <span class="tag">技术杂谈</span><h1>语言环境安装</h1><div class="meta"> <span>2026 年 10 月 10 日</span> <span>约 3227 字 · 9 分钟</span> <a href="/categories/#技术杂谈" title="技术杂谈">技术杂谈</a></div><div class="post-divider"></div></header><div class="wrap"><div class="article markdown-body"><h2 id="1python">1、Python</h2><ol><li>官网：https://www.python.org/</li><li>下载页面：https://www.python.org/downloads/</li></ol><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 安装版本：3.13.15</span>
+<span class="c"># 发布时间：2026年8月5日</span>
+<span class="c"># 安装方式：编译安装</span>
+
+<span class="c"># 安装依赖包、指定OpenSSL库的头文件和链接库路径</span>
+<span class="c"># apt install -y build-essential libssl-dev zlib1g-dev libncurses5-dev libsqlite3-dev libreadline-dev libbz2-dev libffi-dev liblzma-dev tk-dev</span>
+<span class="nv">$ </span>yum <span class="nt">-y</span> <span class="nb">install </span>gcc gcc-c++ make zlib<span class="k">*</span> bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel xz-devel libffi-devel openssl-devel openssl11 openssl11-devel
+<span class="nv">$ </span><span class="nb">export </span><span class="nv">CFLAGS</span><span class="o">=</span><span class="si">$(</span>pkg-config <span class="nt">--cflags</span> openssl11<span class="si">)</span>
+<span class="nv">$ </span><span class="nb">export </span><span class="nv">LDFLAGS</span><span class="o">=</span><span class="si">$(</span>pkg-config <span class="nt">--libs</span> openssl11<span class="si">)</span>
+
+<span class="c"># 编译安装Python</span>
+<span class="nv">$ </span>wget https://www.python.org/ftp/python/3.13.15/Python-3.13.15.tar.xz
+<span class="nv">$ </span><span class="nb">tar </span>xf Python-3.13.15.tar.xz <span class="o">&amp;&amp;</span> <span class="nb">cd </span>Python-3.13.15
+<span class="nv">$ </span>./configure <span class="nt">--enable-shared</span> <span class="nt">--prefix</span><span class="o">=</span>/usr/local/python3 <span class="nt">--with-ssl</span>
+<span class="nv">$ </span>make <span class="nt">-j</span> 5 <span class="o">&amp;&amp;</span> make <span class="nb">install</span>
+
+<span class="nv">$ </span><span class="nb">cat</span> <span class="o">&gt;</span> /etc/profile.d/python3.sh <span class="o">&lt;&lt;</span><span class="sh">'</span><span class="no">EOF</span><span class="sh">'
+export PATH=</span><span class="k">${</span><span class="nv">PATH</span><span class="k">}</span><span class="sh">:/usr/local/python3/bin
+</span><span class="no">EOF
+</span><span class="nv">$ </span><span class="nb">source</span> /etc/profile
+<span class="c"># 会报错,需要配置共享库文件</span>
+<span class="nv">$ </span>python3
+python3: error <span class="k">while </span>loading shared libraries: libpython3.11.so.1.0: cannot open shared object file: No such file or directory
+
+<span class="nv">$ </span><span class="nb">echo</span> <span class="s1">'/usr/local/python3/lib'</span> <span class="o">&gt;&gt;</span> /etc/ld.so.conf.d/python3.conf
+<span class="nv">$ </span>ldconfig
+
+<span class="c"># 配置pip使用国内阿里云源</span>
+<span class="nv">$ </span>python3 <span class="nt">-m</span> pip config <span class="nb">set </span>global.index-url https://mirrors.aliyun.com/pypi/simple
+<span class="c"># 升级pip版本</span>
+<span class="nv">$ </span>python3 <span class="nt">-m</span> pip <span class="nb">install</span> <span class="nt">--upgrade</span> pip
+</code></pre></div></div><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># docker镜像</span>
+<span class="nv">$ </span>docker pull python:3.13.15
+<span class="nv">$ </span>docker pull python:3.13.15-alpine
+</code></pre></div></div><h2 id="2golang">2、Golang</h2><ol><li>官网：https://go.dev/</li><li>下载页面：https://go.dev/dl/</li></ol><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 安装版本：1.26.5</span>
+<span class="c"># 发布时间：2026年7月7日</span>
+<span class="c"># 安装方式：二进制安装</span>
+<span class="nv">$ </span>wget https://go.dev/dl/go1.26.5.linux-amd64.tar.gz
+<span class="nv">$ </span><span class="nb">tar </span>xf go1.26.5.linux-amd64.tar.gz <span class="nt">-C</span> /usr/local/
+<span class="nv">$ </span><span class="nb">cat</span> <span class="o">&gt;</span> /etc/profile.d/golang.sh <span class="o">&lt;&lt;</span><span class="sh">'</span><span class="no">EOF</span><span class="sh">'
+export GOROOT=/usr/local/go
+export GOPATH=</span><span class="nv">$HOME</span><span class="sh">/go
+export PATH=</span><span class="nv">$PATH</span><span class="sh">:</span><span class="nv">$GOROOT</span><span class="sh">/bin:</span><span class="nv">$GOPATH</span><span class="sh">/bin
+</span><span class="no">EOF
+
+</span><span class="nv">$ </span><span class="nb">source</span> /etc/profile
+<span class="nv">$ </span>go version
+go version go1.26.5 linux/amd64
+
+<span class="c"># 设置国内源</span>
+https://goproxy.cn
+https://goproxy.io
+https://goproxy.me
+
+<span class="c"># 环境变量方式</span>
+<span class="nv">$ </span>go <span class="nb">env</span> <span class="nt">-w</span> <span class="nv">GOPROXY</span><span class="o">=</span>https://goproxy.cn,direct
+</code></pre></div></div><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># docker镜像</span>
+<span class="nv">$ </span>docker pull golang:1.26.5
+<span class="nv">$ </span>docker pull golang:1.26.5-alpine
+</code></pre></div></div><h2 id="3java">3、Java</h2><ol><li>官网（Oracle）：https://www.oracle.com/java/</li><li>下载页面（Oracle需要登录）：https://www.oracle.com/cn/java/technologies/downloads/archive/</li></ol><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 安装版本：8u491</span>
+<span class="c"># 发布时间：2026年4月21日</span>
+<span class="c"># 安装方式：二进制安装</span>
+<span class="c"># https://www.oracle.com/cn/java/technologies/javase/javase8u211-later-archive-downloads.html#license-lightbox</span>
+<span class="nv">$ </span><span class="nb">tar </span>xf jdk-8u491-linux-x64.tar.gz <span class="nt">-C</span> /usr/local/
+<span class="nv">$ </span><span class="nb">ln</span> <span class="nt">-s</span> /usr/local/jdk1.8.0_491 /usr/local/java
+<span class="nv">$ </span><span class="nb">cat</span> <span class="o">&gt;</span> /etc/profile.d/java.sh <span class="o">&lt;&lt;</span><span class="sh">'</span><span class="no">EOF</span><span class="sh">'
+export JAVA_HOME=/usr/local/java
+export PATH=</span><span class="nv">$PATH</span><span class="sh">:</span><span class="nv">$JAVA_HOME</span><span class="sh">/bin
+export CLASSPATH=.:</span><span class="nv">$JAVA_HOME</span><span class="sh">/lib/dt.jar:</span><span class="nv">$JAVA_HOME</span><span class="sh">/lib/tool.jar
+</span><span class="no">EOF
+
+</span><span class="nv">$ </span>java <span class="nt">-version</span>
+java version <span class="s2">"1.8.0_491"</span>
+Java<span class="o">(</span>TM<span class="o">)</span> SE Runtime Environment <span class="o">(</span>build 1.8.0_491-b10<span class="o">)</span>
+Java HotSpot<span class="o">(</span>TM<span class="o">)</span> 64-Bit Server VM <span class="o">(</span>build 25.491-b10, mixed mode<span class="o">)</span>
+</code></pre></div></div><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># docker镜像</span>
+<span class="c"># OpenJdk</span>
+<span class="nv">$ </span>docker pull openjdk:8u342					<span class="c"># 不推荐,因为已停更</span>
+<span class="nv">$ </span>docker pull amazoncorretto:8u492			<span class="c"># 亚马逊云维护</span>
+<span class="nv">$ </span>docker pull amazoncorretto:8u492-alpine
+
+<span class="c"># OracleJdk（需要登录并且勾选同意协议）</span>
+<span class="nv">$ </span>docker pull container-registry.oracle.com/java/jdk:8u491
+</code></pre></div></div><h2 id="4nodejs">4、Nodejs</h2><ol><li>官网：https://nodejs.org/zh-cn</li><li>下载页面：https://nodejs.org/zh-cn/download</li></ol><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 安装版本：v16.20.2</span>
+<span class="c"># 发布时间：2023年8月10日</span>
+<span class="c"># 安装方式：二进制安装</span>
+<span class="nv">$ </span>wget https://nodejs.org/dist/v16.20.2/node-v16.20.2-linux-x64.tar.xz
+<span class="nv">$ </span><span class="nb">tar </span>xf node-v16.20.2-linux-x64.tar.xz <span class="nt">-C</span> /usr/local/
+<span class="nv">$ </span><span class="nb">ln</span> <span class="nt">-s</span> /usr/local/node-v16.20.2-linux-x64 /usr/local/nodejs
+<span class="nv">$ </span><span class="nb">cat</span> <span class="o">&gt;</span> /etc/profile.d/nodejs.sh <span class="o">&lt;&lt;</span><span class="sh">'</span><span class="no">EOF</span><span class="sh">'
+export PATH=/usr/local/nodejs/bin:</span><span class="nv">$PATH</span><span class="sh">
+</span><span class="no">EOF
+</span><span class="nv">$ </span><span class="nb">source</span> /etc/profile
+<span class="nv">$ </span>node <span class="nt">--version</span>
+v16.20.2
+
+<span class="c"># npm设置阿里云源</span>
+<span class="nv">$ </span>npm config <span class="nb">set </span>registry http://registry.npmmirror.com
+</code></pre></div></div><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># docker镜像</span>
+<span class="nv">$ </span>docker pull node:16.20.2
+<span class="nv">$ </span>docker pull node:16.20.2-alpine
+</code></pre></div></div></div></div><div class="wrap"><div class="post-foot"><div class="copyright-box"> 本文作者 <strong>朱名斐</strong>，采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a> 协议，转载请注明出处。<br> 原文链接：<a href="http://0.0.0.0:4000/2026/10/10/envinstall/">http://0.0.0.0:4000/2026/10/10/envinstall/</a></div><nav class="post-nav"> <a href="/2026/09/29/welcome/"><span class="label">← 上一篇</span><span class="t">欢迎来到我的博客</span></a> <a href="/2026/10/10/process/"><span class="label">下一篇 →</span><span class="t">Linux进程任务管理</span></a></nav></div></div><div class="comment wrap"></div></article><footer class="site-footer"><div class="wrap inner"> <a class="brand" href="/"><span class="drop"></span>朱名斐的博客</a><div class="flinks"> <a href="/">首页</a><a href="/archives/">归档</a><a href="/categories/">分类</a><a href="/about/">关于</a> <a href="/feed.xml">RSS</a> <a href="https://github.com/zmf3331" target="_blank" rel="noopener">GitHub</a></div><div>© 2026–2026 朱名斐 · 记录学习、思考与技术实践</div></div></footer></body></html>

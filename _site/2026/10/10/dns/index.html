@@ -1,0 +1,109 @@
+<!DOCTYPE html><html lang="zh-CN" prefix="og: http://ogp.me/ns#"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Bind-DNS管理 &mdash; 朱名斐的博客</title><script> (function(){var d=document.documentElement; try{var t=localStorage.getItem('shuimo-theme'); if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'; d.dataset.theme=t;}catch(e){d.dataset.theme='light';} /* 标记 JS 可用：滚动进场动画只在 .js 下隐藏元素， 禁用 JS 时内容照常可见，不会白屏 */ d.classList.add('js');})(); </script><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.7.0/style.css" media="print" onload="this.media='all'"> <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.7.0/style.css"></noscript><link rel="stylesheet" href="/assets/css/shuimo.css?v=1791625166"> <script defer src="/assets/js/shuimo.js?v=1791625166"></script><link rel="canonical" href="http://0.0.0.0:4000/2026/10/10/dns/"><link rel="alternate" type="application/atom+xml" title="朱名斐的博客" href="http://0.0.0.0:4000/feed.xml"><link rel="shortcut icon" href="/favicon.ico"><meta property="og:title" content="Bind-DNS管理"><meta name="keywords" content="朱名斐, 博客, 学习, 思考, 技术实践"><meta name="description" content="1、BIND介绍与安装"><meta property="og:description" content="1、BIND介绍与安装"><meta property="og:url" content="http://0.0.0.0:4000/2026/10/10/dns/"><meta property="og:site_name" content="朱名斐的博客"><meta property="og:type" content="article"><meta property="og:locale" content="zh_CN"><meta property="article:published_time" content="2026-10-10"> <script type="application/ld+json"> {"@context":"https://schema.org","@type":"BlogPosting","headline":"Bind-DNS管理","datePublished":"2026-10-10T14:00:00+08:00","author":{"@type":"Person","name":"朱名斐"},"publisher":{"@type":"Organization","name":"朱名斐的博客"},"mainEntityOfPage":"http://0.0.0.0:4000/2026/10/10/dns/"} </script></head><body class=""><div class="fog"><span class="a"></span><span class="b"></span><span class="c"></span></div><div class="progress" id="progress"></div><header class="site-header"> <a class="brand" href="/" title="朱名斐的博客"><span class="drop"></span>朱名斐的博客</a><nav class="nav" id="nav" role="navigation"> <a class="navlink " href="/" title="首页">首页</a> <a class="navlink " href="/archives/" title="归档">归档</a> <a class="navlink " href="/categories/" title="分类">分类</a> <a class="navlink " href="/about/" title="关于">关于</a> <button class="toggle" id="search-btn" type="button" aria-label="搜索文章"> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.2-4.2"/></svg> </button> <button class="toggle" id="theme-toggle" type="button" aria-label="切换深浅色"> <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg> <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg> </button> <button class="menu-btn" id="menu-btn" type="button" aria-label="菜单"> <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg> </button></nav></header><div class="search-overlay" id="search-overlay" hidden><div class="search-box"><div class="search-bar"> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.2-4.2"/></svg> <input type="search" id="search-input" placeholder="搜索文章标题、正文、分类…" autocomplete="off" spellcheck="false"> <kbd>Esc</kbd></div><div class="search-results" id="search-results"></div></div></div><article><header class="post-head wrap"> <span class="tag">网络</span><h1>Bind-DNS管理</h1><div class="meta"> <span>2026 年 10 月 10 日</span> <span>约 4391 字 · 11 分钟</span> <a href="/categories/#网络" title="网络">网络</a></div><div class="post-divider"></div></header><div class="wrap"><div class="article markdown-body"><h2 id="1bind介绍与安装">1、BIND介绍与安装</h2><h4 id="11-dns协议">1.1 DNS协议</h4><p>​ DNS（Domain Name System，域名系统）是一个分布式数据库系统，用于将人类可读的域名（如 <code class="language-plaintext highlighter-rouge">www.example.com</code>）转换为机器可读的 IP 地址（如 <code class="language-plaintext highlighter-rouge">192.168.1.1</code>），也可以反向解析将 IP 地址转换为域名。DNS 协议采用客户端/服务器模式，默认端口为 53（TCP 和 UDP）。</p><p><strong>01 DNS 查询流程</strong></p><p>​ 当用户在浏览器输入域名时，DNS 解析过程大致如下：首先查询本地 DNS 缓存（浏览器缓存 → 系统 hosts 文件 → 系统 DNS 缓存），如果本地未命中，则向配置的 DNS 服务器（递归解析器）发起查询。递归解析器会依次向根域名服务器 → 顶级域（TLD）服务器 → 权威域名服务器逐级查询，最终返回域名对应的 IP 地址。整个解析过程对最终用户是透明的。</p><p>根域名服务器全球有 13 组（A - M），由 ICANN 管理。顶级域如 <code class="language-plaintext highlighter-rouge">.com</code>、<code class="language-plaintext highlighter-rouge">.cn</code> 分别由各自的注册局管理，权威域名服务器才是域名最终持有者自己配置的服务器。</p><p><strong>02 资源记录类型</strong></p><p>DNS 通过资源记录（Resource Record，RR）来存储和传递域名信息，常见类型如下：</p><table><thead><tr><th>记录类型</th><th>说明</th><th>配置示例</th></tr></thead><tbody><tr><td>A</td><td>将域名指向 IPv4 地址</td><td><code class="language-plaintext highlighter-rouge">www.example.com. IN A 192.168.1.10</code></td></tr><tr><td>AAAA</td><td>将域名指向 IPv6 地址</td><td><code class="language-plaintext highlighter-rouge">www.example.com. IN AAAA 2001:db8::1</code></td></tr><tr><td>CNAME</td><td>别名记录，将域名指向另一个域名</td><td><code class="language-plaintext highlighter-rouge">ftp.example.com. IN CNAME www.example.com.</code></td></tr><tr><td>MX</td><td>邮件交换记录，指定邮件服务器</td><td><code class="language-plaintext highlighter-rouge">example.com. IN MX 10 mail.example.com.</code></td></tr><tr><td>NS</td><td>域名服务器记录，指定该域名的权威 DNS 服务器</td><td><code class="language-plaintext highlighter-rouge">example.com. IN NS ns1.example.com.</code></td></tr><tr><td>TXT</td><td>文本记录，常用于 SPF/DKIM 验证</td><td><code class="language-plaintext highlighter-rouge">example.com. IN TXT "v=spf1 mx ~all"</code></td></tr><tr><td>PTR</td><td>反向记录，将 IP 指向域名</td><td><code class="language-plaintext highlighter-rouge">1.0.168.192.in-addr.arpa. IN PTR ns1.example.com.</code></td></tr><tr><td>SOA</td><td>起始授权记录，定义区域的核心参数</td><td><code class="language-plaintext highlighter-rouge">example.com. IN SOA ns1.example.com. admin.example.com. ( ... )</code></td></tr><tr><td>SRV</td><td>服务定位记录，指定特定服务的服务器</td><td><code class="language-plaintext highlighter-rouge">_sip._tcp.example.com. IN SRV 10 60 5060 sip.example.com.</code></td></tr></tbody></table><h4 id="12-bind安装">1.2 BIND安装</h4><p>​ BIND（Berkeley Internet Name Domain）是目前互联网上使用最广泛的 DNS 服务器软件，由 ISC（Internet Systems Consortium）开发和维护。特点是稳定、功能全面、支持 DNSSEC、支持视图（view）等高级功能。官网：https://www.isc.org/bind/</p><p>主流 Linux 发行版的软件源都内置了 BIND，如果要用较新版本也可以从官网下载源码编译。</p><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Debian/Ubuntu</span>
+<span class="nv">$ </span>apt <span class="nt">-y</span> <span class="nb">install </span>bind9 bind9utils bind9-doc
+
+<span class="c"># RHEL/CentOS/Rocky</span>
+<span class="nv">$ </span>yum <span class="nt">-y</span> <span class="nb">install bind </span>bind-utils bind-chroot
+<span class="nv">$ </span>rpm <span class="nt">-ql</span> <span class="nb">bind</span>
+/etc/named.conf                  <span class="c"># BIND主配置文件</span>
+/etc/named.rfc1912.zones         <span class="c"># RFC1912标准区域定义(默认区域模板)</span>
+/etc/named.root.key              <span class="c"># 根域密钥(用于DNSSEC验证)</span>
+/var/named/                      <span class="c"># 区域文件存放目录</span>
+/var/named/named.ca              <span class="c"># 根提示文件(记录13组根服务器地址)</span>
+/var/named/named.empty           <span class="c"># 空区域模板</span>
+/var/named/named.localhost       <span class="c"># 本地回环正向区域文件</span>
+/var/named/named.loopback        <span class="c"># 本地回环反向区域文件</span>
+/var/named/slaves/               <span class="c"># 从服务器区域文件存放目录(需要named用户可写)</span>
+</code></pre></div></div><h2 id="2bind配置启动">2、BIND配置启动</h2><p>官方文档：https://bind9.readthedocs.io/</p><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cp</span> <span class="nt">-a</span> /etc/named.conf<span class="o">{</span>,.bak<span class="o">}</span>
+<span class="nv">$ </span><span class="nb">grep</span> <span class="nt">-Ev</span> <span class="s1">'^#|^$|^\s*//'</span> /etc/named.conf
+</code></pre></div></div><h4 id="21-全局配置">2.1 全局配置</h4><p>BIND 的配置集中在 <code class="language-plaintext highlighter-rouge">named.conf</code> 中，主体由多个配置块组成：<code class="language-plaintext highlighter-rouge">options</code>（全局选项）、<code class="language-plaintext highlighter-rouge">zone</code>（区域定义）、<code class="language-plaintext highlighter-rouge">logging</code>（日志）、<code class="language-plaintext highlighter-rouge">acl</code>（访问控制列表）等。</p><p><strong>01 基础选项与监听配置</strong></p><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>options <span class="o">{</span>
+	<span class="c"># listen-on [ port 端口号 ] { 监听地址列表(any代表所有地址); };</span>
+    listen-on port 53 <span class="o">{</span> 127.0.0.1 <span class="p">;</span> any<span class="p">;</span> <span class="o">}</span><span class="p">;</span>						<span class="c"># 监听端口和IP，默认仅监听127.0.0.1</span>
+    listen-on-v6 port 53 <span class="o">{</span> ::1<span class="p">;</span> any<span class="p">;</span> <span class="o">}</span><span class="p">;</span>							<span class="c"># IPv6监听配置</span>
+    directory       <span class="s2">"/var/named"</span><span class="p">;</span>								<span class="c"># 区域文件的存放目录(相对路径基于此)</span>
+    dump-file       <span class="s2">"/var/named/data/cache_dump.db"</span><span class="p">;</span>			<span class="c"># rndc dumpdb 缓存转储路径</span>
+    statistics-file <span class="s2">"/var/named/data/named_stats.txt"</span><span class="p">;</span>			<span class="c"># 统计信息文件</span>
+    memstatistics-file <span class="s2">"/var/named/data/named_mem_stats.txt"</span><span class="p">;</span>	<span class="c"># 内存统计文件</span>
+    secroots-file   <span class="s2">"/var/named/data/named.secroots"</span><span class="p">;</span>			<span class="c"># DNSSEC信任锚文件</span>
+    recursing-file  <span class="s2">"/var/named/data/named.recursing"</span><span class="p">;</span>			<span class="c"># 正在递归的查询记录</span>
+
+    pid-file        <span class="s2">"/run/named/named.pid"</span><span class="p">;</span>						<span class="c"># PID文件路径</span>
+    session-keyfile <span class="s2">"/run/named/session.key"</span><span class="p">;</span>					<span class="c"># TSIG会话密钥文件</span>
+
+    allow-query     <span class="o">{</span> any<span class="p">;</span> <span class="o">}</span><span class="p">;</span>                     <span class="c"># 哪些客户端可以查询DNS,可以写多个IP或网段,用;分隔</span>
+    allow-transfer  <span class="o">{</span> none<span class="p">;</span> <span class="o">}</span><span class="p">;</span>                    <span class="c"># 哪些服务器可以进行区域传输(主从复制时需指定从服务器IP)</span>
+    allow-update    <span class="o">{</span> none<span class="p">;</span> <span class="o">}</span><span class="p">;</span>                    <span class="c"># 哪些客户端可以动态更新区域(默认禁止)</span>
+
+    recursion <span class="nb">yes</span><span class="p">;</span>                                <span class="c"># 是否允许递归查询</span>
+    recursion-clients 1000<span class="p">;</span>                       <span class="c"># 最大递归客户端数</span>
+
+    max-cache-ttl 86400<span class="p">;</span>                          <span class="c"># 缓存最大TTL(单位秒,默认1周)</span>
+    max-ncache-ttl 3600<span class="p">;</span>                          <span class="c"># 否定缓存最大TTL</span>
+    max-clients 1000<span class="p">;</span>                             <span class="c"># 最大客户端连接数</span>
+
+    version <span class="s2">"not available"</span><span class="p">;</span>                      <span class="c"># 隐藏BIND版本号(安全加固)</span>
+
+    forwarders <span class="o">{</span>                                  <span class="c"># 转发器：将非权威的递归查询转发给上游DNS</span>
+        8.8.8.8<span class="p">;</span>
+        114.114.114.114<span class="p">;</span>
+    <span class="o">}</span><span class="p">;</span>
+    forward only<span class="p">;</span>                                 <span class="c"># 转发配置,{only仅转发不自行递归|first先转发失败再递归}</span>
+
+    <span class="c"># 禁用不安全或非必要的传输协议</span>
+    dnssec-enable <span class="nb">yes</span><span class="p">;</span>                            <span class="c"># 启用DNSSEC</span>
+    dnssec-validation auto<span class="p">;</span>                       <span class="c"># DNSSEC验证模式(auto使用系统信任锚)</span>
+<span class="o">}</span><span class="p">;</span>
+</code></pre></div></div><p><strong>02 日志配置</strong></p><p>日志文件必须确保 <code class="language-plaintext highlighter-rouge">named</code> 用户有写入权限，且日志目录存在。生产环境建议将 queries 日志单独存放并开启轮替，因为查询日志量极大。</p><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># BIND的日志体系分为三个层次：channel(日志输出渠道) → category(日志类别) → severity(日志级别)</span>
+<span class="c"># 级别从低到高：critical &lt; error &lt; warning &lt; notice &lt; info &lt; debug [level]</span>
+logging <span class="o">{</span>
+    channel default_log <span class="o">{</span>
+        file <span class="s2">"/var/log/named/named.log"</span> versions 3 size 50M<span class="p">;</span>	<span class="c"># 文件路径,保留3个轮替,单文件最大50M</span>
+        severity info<span class="p">;</span>                              <span class="c"># 日志级别</span>
+        print-time <span class="nb">yes</span><span class="p">;</span>                             <span class="c"># 打印时间戳</span>
+        print-severity <span class="nb">yes</span><span class="p">;</span>                         <span class="c"># 打印严重级别</span>
+        print-category <span class="nb">yes</span><span class="p">;</span>                         <span class="c"># 打印日志类别</span>
+    <span class="o">}</span><span class="p">;</span>
+
+    channel security_log <span class="o">{</span>
+        file <span class="s2">"/var/log/named/security.log"</span> versions 3 size 50M<span class="p">;</span>
+        severity info<span class="p">;</span>
+        print-time <span class="nb">yes</span><span class="p">;</span>
+        print-severity <span class="nb">yes</span><span class="p">;</span>
+        print-category <span class="nb">yes</span><span class="p">;</span>
+    <span class="o">}</span><span class="p">;</span>
+
+    channel query_log <span class="o">{</span>
+        file <span class="s2">"/var/log/named/query.log"</span> versions 5 size 200M<span class="p">;</span>
+        severity info<span class="p">;</span>
+        print-time <span class="nb">yes</span><span class="p">;</span>
+        print-severity <span class="nb">yes</span><span class="p">;</span>
+        print-category <span class="nb">yes</span><span class="p">;</span>
+    <span class="o">}</span><span class="p">;</span>
+
+    category default   <span class="o">{</span> default_log<span class="p">;</span> <span class="o">}</span><span class="p">;</span>			<span class="c"># 默认类别(通用日志)</span>
+    category security  <span class="o">{</span> security_log<span class="p">;</span> <span class="o">}</span><span class="p">;</span>			<span class="c"># 安全相关日志(如拒绝的查询)</span>
+    category queries   <span class="o">{</span> query_log<span class="p">;</span> <span class="o">}</span><span class="p">;</span>				<span class="c"># DNS查询日志(生产环境慎用,量非常大)</span>
+    category xfer-in   <span class="o">{</span> default_log<span class="p">;</span> <span class="o">}</span><span class="p">;</span>			<span class="c"># 区域传输入站日志</span>
+    category xfer-out  <span class="o">{</span> default_log<span class="p">;</span> <span class="o">}</span><span class="p">;</span>			<span class="c"># 区域传出站日志</span>
+<span class="o">}</span><span class="p">;</span>
+</code></pre></div></div><p><strong>03 访问控制列表（ACL）</strong></p><p>BIND 内置了四个预定义 ACL：<code class="language-plaintext highlighter-rouge">none</code>（无匹配）、<code class="language-plaintext highlighter-rouge">any</code>（所有主机）、<code class="language-plaintext highlighter-rouge">localhost</code>（本机）、<code class="language-plaintext highlighter-rouge">localnets</code>（本机所在直连网络）。</p><div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># ACL可以将IP列表定义为名称,在allow-query/allow-transfer等配置中引用</span>
+acl <span class="s2">"trusted"</span> <span class="o">{</span>
+    127.0.0.0/8<span class="p">;</span>
+    10.0.0.0/8<span class="p">;</span>
+    172.16.0.0/12<span class="p">;</span>
+    192.168.0.0/16<span class="p">;</span>
+    114.114.114.114<span class="p">;</span>      <span class="c"># 指定单一IP</span>
+<span class="o">}</span><span class="p">;</span>
+
+acl <span class="s2">"slaves"</span> <span class="o">{</span>
+    192.168.1.100<span class="p">;</span>        <span class="c"># DNS从服务器1</span>
+    192.168.1.101<span class="p">;</span>        <span class="c"># DNS从服务器2</span>
+<span class="o">}</span><span class="p">;</span>
+
+options <span class="o">{</span>
+    allow-query     <span class="o">{</span> trusted<span class="p">;</span> <span class="o">}</span><span class="p">;</span>               <span class="c"># 仅允许内部客户端查询</span>
+    allow-recursion <span class="o">{</span> trusted<span class="p">;</span> <span class="o">}</span><span class="p">;</span>               <span class="c"># 仅允许内部客户端递归</span>
+    allow-transfer  <span class="o">{</span> slaves<span class="p">;</span> <span class="o">}</span><span class="p">;</span>                <span class="c"># 仅允许从服务器进行区域传输</span>
+
+    <span class="c"># 可以针对特定区域覆盖全局配置</span>
+<span class="o">}</span><span class="p">;</span>
+</code></pre></div></div><h4 id="22-区域zone配置">2.2 区域Zone配置</h4><p>DNS 区域（Zone）是 DNS 命名空间中的一个管理单元，对应一个域名及其子域名的权威数据。BIND 将区域配置与区域文件分离：在 <code class="language-plaintext highlighter-rouge">named.conf</code> 中声明区域，在独立的区域文件中维护具体的 DNS 记录。</p><h2 id="3dns主从复制">3、DNS主从复制</h2></div></div><div class="wrap"><div class="post-foot"><div class="copyright-box"> 本文作者 <strong>朱名斐</strong>，采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a> 协议，转载请注明出处。<br> 原文链接：<a href="http://0.0.0.0:4000/2026/10/10/dns/">http://0.0.0.0:4000/2026/10/10/dns/</a></div><nav class="post-nav"> <a href="/2026/10/10/vsftpd/"><span class="label">← 上一篇</span><span class="t">Vsftpd部署使用</span></a></nav></div></div><div class="comment wrap"></div></article><footer class="site-footer"><div class="wrap inner"> <a class="brand" href="/"><span class="drop"></span>朱名斐的博客</a><div class="flinks"> <a href="/">首页</a><a href="/archives/">归档</a><a href="/categories/">分类</a><a href="/about/">关于</a> <a href="/feed.xml">RSS</a> <a href="https://github.com/zmf3331" target="_blank" rel="noopener">GitHub</a></div><div>© 2026–2026 朱名斐 · 记录学习、思考与技术实践</div></div></footer></body></html>
